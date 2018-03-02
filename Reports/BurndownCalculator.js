@@ -10,21 +10,7 @@ Ext.define('IterationBurndownCalculator', {
   },
 
   getMetrics: function() {
-
-    return [
-      {
-        as: 'ToDo',
-        display: 'line',
-        f: 'sum',
-        field: 'TaskRemainingTotal'
-      },
-      {
-        as: 'Scope',
-        display: 'area',
-        f: 'count',
-        yAxis: 1
-      }
-    ]
+    return this.config.metrics;
   },
 
   getSummaryMetricsConfig: function () {

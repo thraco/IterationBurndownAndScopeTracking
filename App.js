@@ -6,14 +6,28 @@ Ext.define('Iteration_BurndownApp', {
     launch: function() {
         //Write app code here
         //API Docs: https://help.rallydev.com/apps/2.1/doc/
-        this._loadChart(this.getContext().getTimeboxScope());
+
+        this.add({
+          xtype: 'rallycheckboxfield',
+          fieldLabel: 'Scope in Story Points',
+          id: 'byStoryPointCheckBox',
+          value: false,
+          listeners: {
+            change: {fn: this._loadChart, scope: this}
+          }
+        });
+
+        this._loadChart();
     },
 
-    onScopeChange: function(scope) {
-      this._loadChart(scope);
+    onScopeChange: function() {
+      this._loadChart();
     },
 
-    _loadChart: function (scope) {
+    _loadChart: function () {
+
+      var scope = this.getContext().getTimeboxScope();
+      var burnByCount = this.down('#byStoryPointCheckBox').getValue() === false;
 
       if(this.down('#burndownChart')) {
         this.remove('burndownChart');
@@ -28,33 +42,25 @@ Ext.define('Iteration_BurndownApp', {
         calculatorConfig: {
           completedScheduleStateNames: ['Accepted', 'Quality'],
           startDate: scope.record.data.StartDate,
-          endDate: scope.record.data.EndDate
+          endDate: scope.record.data.EndDate,
+          metrics: [
+            {
+              as: 'ToDo',
+              display: 'line',
+              f: 'sum',
+              field: 'TaskRemainingTotal'
+            },
+            {
+              as: 'Scope',
+              display: 'area',
+              f: (burnByCount)? 'count' : 'sum',
+              yAxis: 1,
+              field: (burnByCount)? null : 'PlanEstimate'
+            }
+          ]
         },
-        chartConfig: this._getChartConfig()
+        chartConfig: this._getChartConfig(burnByCount)
       });
-
-      /*var chart = Ext.ComponentQuery.query('#burndownChart')[0];
-
-      if(chart === undefined) {
-
-        this.add({
-          xtype: 'rallychart',
-          id: 'burndownChart',
-          storetype: 'Rally.data.lookback.SnapshotStore',
-          storeConfig: this._getStoreConfig(scope),
-          calculatorType: 'IterationBurndownCalculator',
-          calculatorConfig: {
-            completedScheduleStateNames: ['Accepted', 'Quality'],
-            startDate: scope.record.data.StartDate,
-            endDate: scope.record.data.EndDate
-          },
-          chartConfig: this._getChartConfig()
-        });
-      } else {
-        var config = this._getStoreConfig(scope);
-        chart.setStoreConfig(config);
-        chart.refresh(config);
-      }*/
     },
 
     _getStoreConfig: function (scope) {
@@ -67,13 +73,13 @@ Ext.define('Iteration_BurndownApp', {
             ],
             'Iteration' : scope.record.data.ObjectID
           },
-          fetch: ["TaskRemainingTotal"]
+          fetch: ["TaskRemainingTotal", "PlanEstimate"]
         }
       ]
     },
 
-    _getChartConfig: function() {
-      return {
+    _getChartConfig: function(burnByCount) {
+      var config = {
         title: {
           text: 'Iteration Burndown'
         },
@@ -84,15 +90,19 @@ Ext.define('Iteration_BurndownApp', {
           {
             title: {text: 'Hours'},
             min: 0
-          },
-          {
-            title: { text: 'Number of Stories'},
-            opposite: true
           }
         ],
         chart: {
-          zoomtype: 'xy'
+          zoomType: 'xy'
         }
       }
+
+      if(!burnByCount) {
+      config.yAxis.push({title: { text: 'Story Points'}, opposite: true});
+    } else {
+      config.yAxis.push({title: {text: 'Story Count'}, opposite: true});
+    }
+
+      return config
     }
 });
