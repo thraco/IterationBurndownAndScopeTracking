@@ -27,6 +27,14 @@ Ext.define('IterationBurndownCalculator', {
           }
           return initialScope;
         }
+      },
+      // I could never figure out how to get the constant value of the capacity into
+      // the dataset to be used here, so this is a fallback value of zero :\
+      {
+        as: 'InitialCapacity',
+        f: function(seriesData, summaryMetrics) {
+          return 0;
+        }
       }
     ]
   },
@@ -43,6 +51,18 @@ Ext.define('IterationBurndownCalculator', {
         },
         display: 'line',
         dashStyle: 'longdash'
+      },
+      // I couldn't figure out how to get the constant capacity value into the dataset
+      // for calculation here, so I calculate it and override the values in the
+      // _transformLumenizeDataToHighchartsSeries.
+      {
+        as: 'Maximum',
+        f: function(row, index, summaryMetrics, seriesData) {
+          return summaryMetrics.InitialCapacity;
+        },
+        display: 'line',
+        dashStyle: 'shortdash',
+        hidden: true
       }
     ]
   },
@@ -84,6 +104,7 @@ Ext.define('IterationBurndownCalculator', {
       var results = calculator.getResults();
 
       var seriesData = results.seriesData;
+      seriesData = this._calculateMaximumBurndown(seriesData);
 
       var finalData = {
           series: this.lumenize.arrayOfMaps_To_HighChartsSeries(seriesData, seriesConfig),
@@ -123,5 +144,15 @@ Ext.define('IterationBurndownCalculator', {
      }
 
      return aggregationConfig;
- }
+  },
+
+  _calculateMaximumBurndown: function(seriesData) {
+    const iterationLength = seriesData.length - 1;
+    const incrementAmountPerDay = this.capacity / iterationLength;
+    for(i=0; i<seriesData.length; i++) {
+      seriesData[i].Maximum = Math.floor(this.capacity - (incrementAmountPerDay * i));
+    }
+
+    return seriesData;
+  }
 });

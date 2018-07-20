@@ -17,20 +17,49 @@ Ext.define('Iteration_BurndownApp', {
           }
         });
 
-        this._loadChart();
+        this.onScopeChange();
     },
 
     onScopeChange: function() {
-      this._loadChart();
+      var capacity = this._loadCapacity();
+
+      capacity.load().then({
+        success: this._loadChart,
+        scope: this
+      }).then({
+        success: function() {
+          console.log('Woohoo!');
+        },
+        failure: function(error) {
+          console.log('ERROR! '+error);
+        }
+      });
     },
 
-    _loadChart: function () {
+    _loadCapacity: function() {
+      return Ext.create('Rally.data.wsapi.Store', {
+        model: 'UserIterationCapacity',
+        fetch: ['Capacity', 'Iteration'],
+        pageSize: 1000, //TODO: Figure out how to limit the query to the timebox scope
+      });
+    },
 
+    _loadChart: function (capacity) {
       var scope = this.getContext().getTimeboxScope();
       var burnByCount = this.down('#byStoryPointCheckBox').getValue() === false;
 
       if(this.down('#burndownChart')) {
         this.remove('burndownChart');
+      }
+
+      var totalCap = 0;
+      for(i=0; i<capacity.length; i++) {
+        if(capacity[i].get('Iteration')._refObjectName === scope.record.data.Name) {
+          var cap = capacity[i].get('Capacity');
+          if(cap != null) {
+            totalCap += cap;
+          }
+        }
       }
 
       this.add({
@@ -43,6 +72,7 @@ Ext.define('Iteration_BurndownApp', {
           completedScheduleStateNames: ['Accepted', 'Quality'],
           startDate: scope.record.data.StartDate,
           endDate: scope.record.data.EndDate,
+          capacity: totalCap,
           metrics: [
             {
               as: 'ToDo',
