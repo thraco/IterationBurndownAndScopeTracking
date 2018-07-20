@@ -13,7 +13,7 @@ Ext.define('Iteration_BurndownApp', {
           id: 'byStoryPointCheckBox',
           value: false,
           listeners: {
-            change: {fn: this._loadChart, scope: this}
+            change: {fn: this.onScopeChange, scope: this}
           }
         });
 
