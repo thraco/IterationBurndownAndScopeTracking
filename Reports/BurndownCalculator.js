@@ -130,8 +130,9 @@ Ext.define('IterationBurndownCalculator', {
       aggregationConfig.push({
         name: metric.as || metric.field,
         type: metric.display,
-        dashStyle: metric.dashStyle || "Solid",
-        yAxis: metric.yAxis || 0
+        dashStyle: metric.dashStyle != null ? metric.dashStyle : "Solid",
+        yAxis: metric.yAxis != null ? metric.yAxis : 0,
+        visible: metric.visible != null ? metric.visible : true
       });
     }
 
@@ -140,8 +141,9 @@ Ext.define('IterationBurndownCalculator', {
       aggregationConfig.push({
         name: derivedField.as,
         type: derivedField.display,
-        dashStyle: derivedField.dashStyle || "Solid",
-        yAxis: derivedField.yAxis || 0
+        dashStyle: derivedField.dashStyle != null ? derivedField.dashStyle : "Solid",
+        yAxis: derivedField.yAxis != null ? derivedField.yAxis : 0,
+        visible: derivedField.visible != null ? derivedField.visible : true
       });
     }
 
