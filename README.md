@@ -43,6 +43,6 @@ guidance about how much is reasonable given the amount of iteration that remains
 
 Iteration Burndown and Scope Tracking is released under the MIT license.  See the file [LICENSE](./LICENSE) for the full text.
 
-##Documentation for SDK
+## Documentation for SDK
 
 You can find the SDK documentation on Rally's help [site.](https://help.rallydev.com/apps/2.1/doc/)
