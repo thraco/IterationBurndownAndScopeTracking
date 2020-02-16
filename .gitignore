@@ -5,6 +5,7 @@ App-debug.html
 # Ignore 'local' build version of App
 App-local.html
 #IDE Files
-.idea
-.c9revisions
+*.idea
+*.c9revisions
 node_modules
+*.iml
