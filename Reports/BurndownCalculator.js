@@ -68,12 +68,27 @@ Ext.define('IterationBurndownCalculator', {
   },
 
   runCalculation: function(snapshots) {
+    //TODO: Should this be checking based on the current time, or 00:00:00? I don't know.
     const tomorrow =  Ext.Date.format(new Date(new Date().getTime() + 86400000), "Y-m-d\\TH:i:s") + '.000Z';
-    // snapshots that extend to the default date are 'current' so we should set their 'ValidTo' property to tomorrow's date.
+    const weekendLength = 7 - this.getWorkDays().length;
+    const dayOfWeek = Ext.Date.format(new Date(new Date().getTime()), "l"); // Day of week in long form, e.g. Friday
+
+    /* Sets the next workday to tomorrow unless it's the end of the week, in which case it selects the next workday,
+    /  based on the calculated length of the weekend. The outcome of this is that the chart will update on the last
+    /  day of the week, which will not happen if the next ValidTo date is not a work day.
+    /
+    /  Assumes: 7-day week, sequential work week, sequential weekend, 24-hour rotation period of Earth
+    */
+    var nextWorkDay = tomorrow;
+    if(dayOfWeek === this.getWorkDays()[this.getWorkDays().length-1]) {
+        nextWorkDay = Ext.Date.format(new Date(new Date().getTime() + (weekendLength+1)*86400000), "Y-m-d\\TH:i:s") + '.000Z';
+    }
+
+    // snapshots that extend to the default date are 'current' so we should set their 'ValidTo' property to the next workday's date.
     // this prevents the Actual burndown from flatlining into the future, and forces it to only report the past and current state of things.
     Ext.Array.forEach(snapshots, function(s) {
       if(s._ValidTo === '9999-01-01T00:00:00.000Z') {
-        s._ValidTo = tomorrow;
+        s._ValidTo = nextWorkDay;
       }
     }, this);
 
