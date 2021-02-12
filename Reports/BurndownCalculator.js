@@ -6,7 +6,7 @@ Ext.define('IterationBurndownCalculator', {
   },
 
   getWorkDays: function() {
-    return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   },
 
   getMetrics: function() {
@@ -36,7 +36,7 @@ Ext.define('IterationBurndownCalculator', {
           return 0;
         }
       }
-    ]
+    ];
   },
 
   getDerivedFieldsAfterSummary: function () {
@@ -50,7 +50,8 @@ Ext.define('IterationBurndownCalculator', {
           return Math.floor(summaryMetrics.InitialScope - (incrementAmountPerDay * index));
         },
         display: 'line',
-        dashStyle: 'longdash'
+        dashStyle: 'longdash',
+        zIndex: 700
       },
       // I couldn't figure out how to get the constant capacity value into the dataset
       // for calculation here, so I calculate it and override the values in the
@@ -62,9 +63,10 @@ Ext.define('IterationBurndownCalculator', {
         },
         display: 'line',
         dashStyle: 'shortdash',
-        visible: false
+        visible: false,
+        zIndex: 600
       }
-    ]
+    ];
   },
 
   runCalculation: function(snapshots) {
@@ -114,7 +116,7 @@ Ext.define('IterationBurndownCalculator', {
       series: [
         {field: 'ToDo'}
       ]
-    }
+    };
   },
 
   _transformLumenizeDataToHighchartsSeries: function (calculator, seriesConfig) {
@@ -147,7 +149,9 @@ Ext.define('IterationBurndownCalculator', {
         type: metric.display,
         dashStyle: metric.dashStyle != null ? metric.dashStyle : "Solid",
         yAxis: metric.yAxis != null ? metric.yAxis : 0,
-        visible: metric.visible != null ? metric.visible : true
+        visible: metric.visible != null ? metric.visible : true,
+        fillOpacity: metric.fillOpacity,
+        zIndex: metric.zIndex != null ? metric.zIndex : 500
       });
     }
 
@@ -158,7 +162,9 @@ Ext.define('IterationBurndownCalculator', {
         type: derivedField.display,
         dashStyle: derivedField.dashStyle != null ? derivedField.dashStyle : "Solid",
         yAxis: derivedField.yAxis != null ? derivedField.yAxis : 0,
-        visible: derivedField.visible != null ? derivedField.visible : true
+        visible: derivedField.visible != null ? derivedField.visible : true,
+        fillOpacity: metric.fillOpacity,
+        zIndex: derivedField.zIndex != null ? derivedField.zIndex : 500
       });
     }
 
@@ -168,7 +174,7 @@ Ext.define('IterationBurndownCalculator', {
   _calculateMaximumBurndown: function(seriesData) {
     const iterationLength = seriesData.length - 1;
     const incrementAmountPerDay = this.capacity / iterationLength;
-    for(i=0; i<seriesData.length; i++) {
+    for(var i=0; i<seriesData.length; i++) {
       seriesData[i].Maximum = Math.floor(this.capacity - (incrementAmountPerDay * i));
     }
 

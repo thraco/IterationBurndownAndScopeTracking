@@ -78,14 +78,17 @@ Ext.define('Iteration_BurndownApp', {
             as: 'ToDo',
             display: 'line',
             f: 'sum',
-            field: 'TaskRemainingTotal'
+            field: 'TaskRemainingTotal',
+            zIndex: 1000
           },
           {
             as: 'Scope',
             display: 'area',
             f: (burnByCount)? 'count' : 'sum',
             yAxis: 1,
-            field: (burnByCount)? null : 'PlanEstimate'
+            field: (burnByCount)? null : 'PlanEstimate',
+            fillOpacity: .5,
+            zIndex: 200
           }
         ]
       },
